@@ -1,4 +1,4 @@
-package eu.philipplang.passwordkeepasskonverter;
+package de.attrobit.passwordkeepasskonverter;
 
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
