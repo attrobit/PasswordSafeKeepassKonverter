@@ -2,7 +2,6 @@ package de.attrobit.passwordkeepasskonverter;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.security.NoSuchAlgorithmException;
 
 import javax.swing.JOptionPane;
@@ -15,7 +14,6 @@ import org.pwsafe.lib.file.PwsFile;
 import org.pwsafe.lib.file.PwsFileFactory;
 
 import de.slackspace.openkeepass.domain.Group;
-import de.slackspace.openkeepass.domain.KeePassFile;
 
 public class Main {
 
@@ -44,6 +42,8 @@ public class Main {
 		PwsFile pwsFile = PwsFileFactory.loadFile(path, new StringBuilder(passwd));
 
 		Group convert = new Konverter().convert(pwsFile);
+
+		System.out.println(convert.getGroups().size() + " Gruppen konvertiert");
 
 		// TODO: Safe file
 	}

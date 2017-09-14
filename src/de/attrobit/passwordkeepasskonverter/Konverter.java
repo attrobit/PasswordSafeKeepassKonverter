@@ -27,6 +27,10 @@ public class Konverter {
 			PwsRecord pwsRecord = records.next();
 
 			PwsField field = pwsRecord.getField(PwsFieldTypeV3.GROUP);
+			if (field == null) {
+				groupBuilder.getEntries().add(convertRecord(pwsRecord));
+				continue;
+			}
 			String fieldString = new String(field.getBytes());
 
 			// verify group
