@@ -1,5 +1,8 @@
 package de.attrobit.passwordkeepasskonverter;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.Optional;
 
@@ -12,6 +15,7 @@ import de.slackspace.openkeepass.domain.Entry;
 import de.slackspace.openkeepass.domain.EntryBuilder;
 import de.slackspace.openkeepass.domain.Group;
 import de.slackspace.openkeepass.domain.GroupBuilder;
+import de.slackspace.openkeepass.domain.TimesBuilder;
 
 public class Konverter {
 
@@ -40,8 +44,69 @@ public class Konverter {
 	}
 
 	private Entry convertRecord(PwsRecord record) {
-		String title = (String) record.getField(PwsFieldTypeV3.TITLE).getValue();
+		EntryBuilder entryBuilder = new EntryBuilder();
+		entryBuilder.times(new TimesBuilder().build());
 
-		return new EntryBuilder(title).build();
+		Iterator<Integer> fields = record.getFields();
+		while (fields.hasNext()) {
+			Integer fieldValue = fields.next();
+			mapField(record.getField(fieldValue), PwsFieldTypeV3.valueOf(fieldValue), entryBuilder);
+		}
+
+		return entryBuilder.build();
+	}
+
+	private void mapField(PwsField field, PwsFieldTypeV3 fieldType, EntryBuilder entryBuilder) {
+		switch (fieldType) {
+		case TITLE:
+			entryBuilder.title(field.toString());
+			break;
+		case GROUP:
+			break;
+		case NOTES:
+			entryBuilder.notes(field.toString());
+			break;
+		case PASSWORD:
+			entryBuilder.password(field.toString());
+			break;
+		case USERNAME:
+			entryBuilder.username(field.toString());
+			break;
+		case URL:
+			entryBuilder.url(field.toString());
+			break;
+		case UUID:
+			entryBuilder.uuid(java.util.UUID.nameUUIDFromBytes(field.getBytes()));
+			break;
+		case AUTOTYPE:
+		case CREATION_TIME:
+			entryBuilder.times(new TimesBuilder(entryBuilder.getTimes()).creationTime(toCalendar(field)).build());
+			break;
+		case LAST_MOD_TIME:
+			entryBuilder
+					.times(new TimesBuilder(entryBuilder.getTimes()).lastModificationTime(toCalendar(field)).build());
+			break;
+		case LAST_ACCESS_TIME:
+			entryBuilder.times(new TimesBuilder(entryBuilder.getTimes()).lastAccessTime(toCalendar(field)).build());
+			break;
+		case PASSWORD_MOD_TIME:
+			// ignoriere password mod time
+			break;
+		case END_OF_RECORD:
+		case PASSWORD_EXPIRY_INTERVAL:
+		case PASSWORD_HISTORY:
+		case PASSWORD_LIFETIME:
+		case PASSWORD_POLICY:
+		case PASSWORD_POLICY_DEPRECATED:
+		case V3_ID_STRING:
+		default:
+			throw new RuntimeException("Field not mapped: " + fieldType);
+		}
+	}
+
+	private static Calendar toCalendar(PwsField field) {
+		Calendar calendar = GregorianCalendar.getInstance();
+		calendar.setTime((Date) field.getValue());
+		return calendar;
 	}
 }
